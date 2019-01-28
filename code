@@ -1,0 +1,547 @@
+#include <LiquidCrystal.h>
+#include <Keypad.h>
+#include <math.h>
+#include <string.h>
+
+const byte ROWS = 4;
+const byte COLS = 4;
+const int len = 5;
+
+char keys[ROWS][COLS] = {
+  {'1','2','3','+'},
+  {'4','5','6','-'},
+  {'7','8','9','*'},
+  {'C','0','=','/'}
+};
+
+byte rowPins[ROWS] = { 10, 9, 8, 7 };
+byte colPins[COLS] = { 6, A0, A1, A2};
+
+char key;
+int i=0;
+String history[len];
+int indexHis=0;
+String user="",manip="",pswd="";
+int masterkey=0;
+String pass[3]= {"123","123456","---123"};
+
+Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+void setup()
+{
+  lcd.begin(16, 2);
+  Serial.begin(9600);
+  lcd.setCursor(0,0);
+  lcd.clear();
+  bool flag=false;
+  while(!flag){
+    flag = loginScreen();
+  }
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("login success");
+  delay(1000);
+  lcd.clear();
+}
+
+bool loginScreen(){
+  lcd.setCursor(0,0);
+  lcd.print("Enter user no. ");
+  Serial.println("Enter user no. ");
+  while(1){
+    key = kpd.getKey();
+    if(key){
+      switch(key){
+        case '1':
+          Serial.println(key);
+          lcd.clear();
+          lcd.print("User "); lcd.print(key); lcd.print(" pswd");
+          pswd = getPass();
+          if(pswd.equals(pass[0])){
+            return true;
+          }
+          else {
+            lcd.clear();
+            lcd.print("try again");
+            delay(1000);
+            lcd.clear();
+            return false;
+          }
+          break;
+        case '2':
+          Serial.println(key);
+          lcd.clear();
+          lcd.print("User "); lcd.print(key-'0'); lcd.print(" pswd");
+          pswd = getPass();
+          if(pswd.equals(pass[1])){
+            return true;
+          }
+          else {
+            lcd.clear();
+            lcd.print("try again");
+            delay(1000);
+            lcd.clear();
+            return false;
+          }
+          break;
+        case '3':
+          Serial.println(key);
+          lcd.clear();
+          lcd.print("User "); lcd.print(key-'0'); lcd.print(" pswd");
+          pswd = getPass();
+          if(pswd.equals(pass[2])){
+            return true;
+          }
+          else {
+            lcd.clear();
+            lcd.print("try again");
+            delay(1000);
+            lcd.clear();
+            return false;
+          }
+          break;
+        case '0':
+          pswdChange();
+          return false;
+          break;
+        default :
+          lcd.print(key-'0');
+          Serial.println(key);
+          lcd.clear();
+          lcd.print("invalid usr no.");
+          lcd.setCursor(0,1);
+          delay(1500);
+          lcd.clear();
+          return false;
+          break;
+      }
+    }
+  }
+}
+
+void pswdChange(){
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("pswd chng mode");
+  Serial.println("pswd chng mode");
+  lcd.setCursor(0,1);
+  lcd.print("Enter user no. ");
+  Serial.println("Enter user no. ");
+  while(1){
+    key = kpd.getKey();
+    if(key){
+      switch(key){
+        case '1':
+          Serial.println(key);
+          lcd.clear();
+          lcd.print("User "); lcd.print(key); lcd.print(" old pswd");
+          pswd = getPass();
+          if(pswd.equals(pass[0])){
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("new pswd");
+            pswd= getPass();
+            if(pswd.equals("")){
+              lcd.clear();
+              lcd.setCursor(0,0);
+              lcd.print("not valid pswd");
+              lcd.clear();
+              return;
+            }
+            pass[0] = pswd;
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("change success");
+            delay(1000);
+            lcd.clear();
+            return ;
+          }
+          else{
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("invalid pswd");
+            lcd.setCursor(0,1);
+            delay(1000);
+            lcd.print("get a life mf");
+            delay(1000);
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("back to login");
+            delay(1000);
+            return;
+          }
+          break;
+
+        case '2':
+          Serial.println(key);
+          lcd.clear();
+          lcd.print("User "); lcd.print(key); lcd.print(" old pswd");
+          pswd = getPass();
+          if(pswd.equals(pass[1])){
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("new pswd");
+            pswd= getPass();
+            if(pswd.equals("")){
+              lcd.clear();
+              lcd.setCursor(0,0);
+              lcd.print("not valid pswd");
+              lcd.clear();
+              return;
+            }
+            pass[1] = pswd;
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("change success");
+            delay(1000);
+            lcd.clear();
+            return ;
+          }
+          else{
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("invalid pswd");
+            lcd.setCursor(0,1);
+            delay(1000);
+            lcd.print("get a life mf");
+            delay(1000);
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("back to login");
+            delay(1000);
+            return;
+          }
+          break;
+
+        case '3':
+          Serial.println(key);
+          lcd.clear();
+          lcd.print("User "); lcd.print(key); lcd.print(" old pswd");
+          pswd = getPass();
+          if(pswd.equals(pass[2])){
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("new pswd");
+            pswd= getPass();
+            if(pswd.equals("")){
+              lcd.clear();
+              lcd.setCursor(0,0);
+              lcd.print("not valid pswd");
+              lcd.clear();
+              return;
+            }
+            pass[2] = pswd;
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("change success");
+            delay(1000);
+            lcd.clear();
+            return ;
+          }
+          else{
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("invalid pswd");
+            delay(1000);
+            lcd.setCursor(0,1);
+            lcd.print("get a life mf");
+            delay(1000);
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("back to login");
+            delay(1000);
+            return;
+          }
+          break;
+
+          default :
+            Serial.println(key);
+            lcd.clear();
+            lcd.print("invalid User");
+            delay(1000);
+           	lcd.setCursor(0,1);
+          	lcd.print("back to login");
+          	delay(1000);
+            lcd.clear();
+            return;
+            break;
+        }
+      }
+    }
+  }
+
+String getPass(){
+  lcd.setCursor(0,1);
+  String val="";
+  while(1){
+    key=kpd.getKey();
+    if(key){
+      switch(key){
+        case '=':
+          return val;
+          break;
+        case 'C':
+          return "";
+          break;
+        default :
+          val+=key;
+          lcd.print("*");
+          Serial.print(key);
+          break;
+      }
+    }
+  }
+}
+
+void loop()
+{
+  key = kpd.getKey();
+  if(key)
+  {
+    switch(key)
+    {
+      case '0' ... '9':
+        manip+=key;
+      	lcd.print(key-'0');
+      	Serial.print(key);
+        break;
+
+      case '+':
+        manip+=key;
+      	lcd.print("+");
+      	Serial.print(key);
+        break;
+
+      case '-':
+        manip+=key;
+      	lcd.print("-");
+      	Serial.print(key);
+        break;
+
+      case '*':
+        manip+=key;
+      	lcd.print("*");
+      	Serial.print(key);
+        break;
+
+      case '/':
+        manip+=key;
+      	lcd.print("/");
+      	Serial.print(key);
+        break;
+
+      case 'C':
+        manip = "";
+        lcd.clear();
+        Serial.flush();
+        break;
+
+      case '=':
+      	Serial.print(key);
+      	manip = decCare(manip);
+      	if(manip.equals("***")){
+           lcd.clear();
+           lcd.print("loading hstry..");
+           Serial.println("loading hstry..");
+           delay(500);
+           lcd.clear();
+           showHistory();
+        }
+      	if(! manip.equals("***"))
+          (storeHistory(manip));
+      	float output= getResult(manip);
+      	lcd.setCursor(0,1);
+      	lcd.print(output);
+      	break;
+    }
+  }
+}
+
+void storeHistory(String manip){
+  if(indexHis<len){
+    history[indexHis]=manip;
+    indexHis++;
+  }
+  else {
+    for(int i=0;i<len-1;i++){
+      history[i]=history[i+1];
+    }
+    history[len-1]=manip;
+  }
+}
+
+void showHistory(){
+  lcd.clear();
+  int temp = indexHis;
+  if(indexHis==0){
+    lcd.print("no history");
+    delay(500);
+    lcd.clear();
+    lcd.print("back to wrkspace");
+    Serial.println("back to wrkspace");
+    delay(500);
+    lcd.clear();
+    return;
+  }
+  lcd.print(history[--temp]);
+  while(1){
+    key = kpd.getKey();
+    if(key){
+      switch(key){
+        case '+':
+          lcd.clear();
+          temp = ++temp < 4 ? temp:4;
+          if(temp>=indexHis)
+            temp=indexHis-1;
+          lcd.print(history[temp]);
+          Serial.println(history[temp]);
+          break;
+        case '-':
+          lcd.clear();
+          temp = --temp > 0 ? temp:0;
+          lcd.print(history[temp]);
+          Serial.println(history[temp]);
+          break;
+        case 'C':
+          lcd.clear();
+          lcd.print("back to wrkspace");
+          Serial.println("back to wrkspace");
+          delay(500);
+          lcd.clear();
+          return;
+        case '=':
+          manip= history[temp];
+          return;
+      }
+    }
+    if(temp<0) temp=0;
+    if(temp>4) temp=4;
+  }
+}
+
+String decCare(String manip){
+  for(int i=0;i<manip.length();i++){
+    if(manip[i]=='-' && manip[i+1]=='-'){
+      manip[i]='.';
+      for(int j=i+1;j<manip.length()-1;j++){
+        manip[j]=manip[j+1];
+      }
+      manip=manip.substring(0,manip.length()-1);
+    }
+  }
+  return manip;
+}
+
+float getResult (String s){
+  float v[10]={0}; int index1=0,index2=0;
+  char sign[10]={'.','.','.','.','.','.','.','.','.','.'};
+  String val="";
+  for(int i =0;i<s.length();i++){
+    if(s[i]=='+' && s[i+1]=='+'){
+      i+=2;
+      while(true && i<s.length()){
+        if(s[i]=='+' || s[i]=='-' || s[i]=='/' || s[i]=='*' || s[i]=='.')
+          break;
+        val+=s[i];
+        i++;
+      }
+      int g = val.toInt(); val="";
+      v[index1]=g; index1++;
+      i--;
+    }
+    else if(s[i]=='/' && s[i+1]=='/'){
+      i+=2;
+      while(true && i<s.length()){
+        if(s[i]=='+' || s[i]=='-' || s[i]=='/' || s[i]=='*' )
+          break;
+        val+=s[i];
+        i++;
+      }
+      float g = val.toFloat(); val="";
+      v[index1]=sqrt(g); index1++;
+      i--;
+    }
+    else if (s[i]=='+' || s[i]=='-' || s[i]=='/' || s[i]=='*' || s[i]=='.'){
+      sign[index2]=s[i]; index2++;
+    }
+    else{
+      while(true && i<s.length()){
+        if(s[i]=='+' || s[i]=='-' || s[i]=='/' || s[i]=='*' || s[i]=='.')
+          break;
+        val+=s[i];
+        i++;
+      }
+      int g = val.toInt(); val="";
+      v[index1]=g; index1++;
+      i--;
+    }
+  }
+  /*for(int i=0;i<index1;i++){
+    Serial.print(v[i]);
+  }
+  Serial.println("");
+  for(int i=0;i<index2;i++){
+    Serial.print(sign[i]);
+  }*/
+  for(int i=0;i<index2;i++){
+    if(sign[i]=='.'){
+    	String midVal= String((int)v[i])+"."+String((int)v[i+1]);
+      	v[i]= midVal.toFloat();
+      	for (int j = i+1; j < index1;j++)
+          v[j]=v[j+1];
+        for (int j = i; j < index2;j++)
+          sign[j]=sign[j+1];
+      	index1--;index2--;
+    }
+  }
+  /*for(int i=0;i<index1;i++){
+    Serial.print(v[i]);
+  }
+  Serial.println("");
+  for(int i=0;i<index2;i++){
+    Serial.print(sign[i]);
+  }*/
+  for(int i=0;i<index2;i++){
+    if(sign[i]=='/'){
+    	v[i] = v[i]/v[i+1];
+      	for (int j = i+1; j < index1;j++)
+          v[j]=v[j+1];
+        for (int j = i; j < index2;j++)
+          sign[j]=sign[j+1];
+      	index1--;index2--;i--;
+    }
+  }
+  for(int i=0;i<index2;i++){
+    if(sign[i]=='*'){
+    	v[i] = v[i]*v[i+1];
+      	for (int j = i+1; j < index1;j++)
+          v[j]=v[j+1];
+        for (int j = i; j < index2;j++)
+          sign[j]=sign[j+1];
+      	index1--;index2--;i--;
+    }
+  }
+  for(int i=0;i<index2;i++){
+    if(sign[i]=='+'){
+    	v[i] = v[i]+v[i+1];
+      	for (int j = i+1; j < index1;j++)
+          v[j]=v[j+1];
+        for (int j = i; j < index2;j++)
+          sign[j]=sign[j+1];
+      	index1--;index2--;i--;
+    }
+  }
+  for(int i=0;i<index2;i++){
+    if(sign[i]=='-'){
+    	v[i] = v[i]-v[i+1];
+      	for (int j = i+1; j < index1;j++)
+          v[j]=v[j+1];
+        for (int j = i; j < index2;j++)
+          sign[j]=sign[j+1];
+      	index1--;index2--;i--;
+    }
+  }
+  Serial.println(v[0],4);
+  return v[0];
+}
