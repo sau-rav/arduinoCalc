@@ -18,7 +18,7 @@ Keymap for using the 4x4 arduino compatible keypad :  {'1','2','3','+'}
                                                       {'7','8','9','* '}
                                                       {'C','0','=','/'}
                                                       
-Arduino connection present in resources folder.
+Arduino connection present in connection.png.
 
 --Saurav 
 
